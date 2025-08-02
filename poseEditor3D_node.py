@@ -15,12 +15,12 @@ class PoseEditor3D(object):
         pass
 
     @classmethod
-    def INPUT_TYPES(self):
-        temp_dir = folder_paths.get_temp_directory()
-        temp_dir = os.path.join(temp_dir, '3dposeeditor')
+    def INPUT_TYPES(cls):
+        # temp_dir = folder_paths.get_temp_directory()
+        # temp_dir = os.path.join(temp_dir, '3dposeeditor')
 
-        if not os.path.isdir(temp_dir):
-            os.makedirs(temp_dir)
+        # if not os.path.isdir(temp_dir):
+        #     os.makedirs(temp_dir)
 
         return {
             "optional": {
@@ -44,31 +44,28 @@ class PoseEditor3D(object):
         if pose is None:
             return (None, None, None, None,)
 
-        temp_dir = folder_paths.get_temp_directory()
-        temp_dir = os.path.join(temp_dir, '3dposeeditor')
-
-        image_path = os.path.join(temp_dir, pose)
+        image_path = folder_paths.get_annotated_filepath(f"{pose} [temp]", folder_paths.get_temp_directory())
 
         i = Image.open(image_path)
         poseImage = i.convert("RGB")
         poseImage = np.array(poseImage).astype(np.float32) / 255.0
         poseImage = torch.from_numpy(poseImage)[None,]
 
-        image_path = os.path.join(temp_dir, depth)
+        image_path = folder_paths.get_annotated_filepath(f"{depth} [temp]", folder_paths.get_temp_directory())
 
         i = Image.open(image_path)
         depthImage = i.convert("RGB")
         depthImage = np.array(depthImage).astype(np.float32) / 255.0
         depthImage = torch.from_numpy(depthImage)[None,]
 
-        image_path = os.path.join(temp_dir, normal)
+        image_path = folder_paths.get_annotated_filepath(f"{normal} [temp]", folder_paths.get_temp_directory())
 
         i = Image.open(image_path)
         normalImage = i.convert("RGB")
         normalImage = np.array(normalImage).astype(np.float32) / 255.0
         normalImage = torch.from_numpy(normalImage)[None,]
 
-        image_path = os.path.join(temp_dir, canny)
+        image_path = folder_paths.get_annotated_filepath(f"{canny} [temp]", folder_paths.get_temp_directory())
 
         i = Image.open(image_path)
         cannyImage = i.convert("RGB")
@@ -82,10 +79,7 @@ class PoseEditor3D(object):
         if pose is None:
             return False
 
-        temp_dir = folder_paths.get_temp_directory()
-        temp_dir = os.path.join(temp_dir, '3dposeeditor')
-
-        image_path = os.path.join(temp_dir, pose)
+        image_path = folder_paths.get_annotated_filepath(f"{pose} [temp]", folder_paths.get_temp_directory())
         # print(f'Change: {image_path}')
 
         m = hashlib.sha256()

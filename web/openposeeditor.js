@@ -22,7 +22,7 @@ class OpenPoseEditor {
             formData.append('image', blobData, filename)
             formData.append('overwrite', 'true')
             formData.append('type', 'temp')
-            formData.append('subfolder', '3dposeeditor')
+            // formData.append('subfolder', '3dposeeditor')
 
             const resp = await app.api.fetchApi('/upload/image', {
                 method: 'POST',
@@ -57,14 +57,16 @@ function initWidgets(node, inputName, inputData, app) {
         }
     }
 
-    function syncSizeToPoseEditor(node) {
+    function doSyncSizeToPoseEditor(widgetNode) {
         postMessage({
             cmd: 'openpose-3d',
             method: 'SetOutputSize',
             type: 'call',
-            payload: [node.widgets[0].value, node.widgets[1].value],
+            payload: [widgetNode.widgets[0].value, widgetNode.widgets[1].value],
         })
     }
+
+    const syncSizeToPoseEditor = debounce(doSyncSizeToPoseEditor, 500)
 
     node.initing = true
     node.openposeeditor = new OpenPoseEditor(app, node)
