@@ -1,10 +1,6 @@
 import hashlib
 import os
-import json
-import base64
-from server import PromptServer
-from aiohttp import web
-from PIL import Image, ImageOps
+from PIL import Image
 import torch
 import numpy as np
 import folder_paths
@@ -27,12 +23,14 @@ class PoseEditor3D(object):
             os.makedirs(temp_dir)
 
         return {
-            "required": {},
             "optional": {
-                "pose": (sorted(os.listdir(temp_dir)), ),
-                "depth": (sorted(os.listdir(temp_dir)), ),
-                "normal": (sorted(os.listdir(temp_dir)), ),
-                "canny": (sorted(os.listdir(temp_dir)), ),
+                # 宽高解决进页面时节点不在可视区域获取获取不到正确的图片问题
+                "width": ("INT", {"default": 512, "min": 1, "max": 2048}),
+                "height": ("INT", {"default": 512, "min": 1, "max": 2048}),
+                "pose": ("STRING", {"default": "", "read_only": True, "dynamicPrompts": False}),
+                "depth": ("STRING", {"default": "", "read_only": True, "dynamicPrompts": False}),
+                "normal": ("STRING", {"default": "", "read_only": True, "dynamicPrompts": False}),
+                "canny": ("STRING", {"default": "", "read_only": True, "dynamicPrompts": False}),
             },
         }
 
@@ -42,7 +40,7 @@ class PoseEditor3D(object):
 
     CATEGORY = "image"
 
-    def output_pose(self, pose=None, depth=None, normal=None, canny=None):
+    def output_pose(self, width=None, height=None, pose=None, depth=None, normal=None, canny=None):
         if pose is None:
             return (None, None, None, None,)
 
@@ -77,10 +75,10 @@ class PoseEditor3D(object):
         cannyImage = np.array(cannyImage).astype(np.float32) / 255.0
         cannyImage = torch.from_numpy(cannyImage)[None,]
 
-        return (poseImage, depthImage, normalImage, cannyImage,)
+        return poseImage, depthImage, normalImage, cannyImage,
 
-    @staticmethod
-    def IS_CHANGED(self, pose=None, depth=None, normal=None, canny=None):
+    @classmethod
+    def IS_CHANGED(cls, width=None, height=None, pose=None, depth=None, normal=None, canny=None):
         if pose is None:
             return False
 
